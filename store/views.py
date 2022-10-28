@@ -15,7 +15,7 @@ def store(request):
 	else:
 		#Create empty cart for now for non-logged in user
 		items = []
-		pedido = {'get_cart_total':0, 'get_cart_items':0, 'shipping':False}
+		pedido = {'get_cart_total':0, 'get_cart_items':0, 'envio':False}
 		cartItems = pedido['get_cart_items']
 		
 	productos = Producto.objects.all()
@@ -32,7 +32,7 @@ def cart(request):
 	else:
 		#Create empty cart for now for non-logged in user
 		items = []
-		pedido = {'get_cart_total':0, 'get_cart_items':0}
+		pedido = {'get_cart_total':0, 'get_cart_items':0,'envio':False}
 		cartItems = pedido['get_cart_items']
 
 	context = {'items':items, 'pedido':pedido,'cartItems':cartItems}
@@ -47,7 +47,7 @@ def checkout(request):
 	else:
 		#Create empty cart for now for non-logged in user
 		items = []
-		pedido = {'get_cart_total':0, 'get_cart_items':0}
+		pedido = {'get_cart_total':0, 'get_cart_items':0, 'envio':False}
 		cartItems = pedido['get_cart_items']
 
 	context = {'items':items, 'pedido':pedido,'cartItems':cartItems}
@@ -79,3 +79,32 @@ def updateItem(request):
 	
 
 	return JsonResponse('Item was added', safe=False)
+
+def processOrder(request):
+	codigo_transaccion = datetime.datetime.now().timestamp()
+	data = json.loads(request.body)
+
+	if request.user.is_authenticated:
+		cliente = request.user.cliente
+		pedido, created = Pedido.objects.get_or_create(cliente=cliente, completo=False) # inserts one record into table Pedido
+		total = float(data['form']['total']) # We get the total value from the form in the fetch call 
+		pedido.codigo_transaccion = codigo_transaccion
+
+		if total == pedido.get_cart_total:
+			pedido.completo = True
+		pedido.save()
+
+		# Si el pedido contiene productos no digitales, se crea un registro en tabla DireccionPedido
+		if pedido.envio == True:
+			DireccionPedido.objects.create(
+			cliente=cliente,
+			pedido=pedido,
+			direccion=data['envio']['direccion'],
+			ciudad=data['envio']['ciudad'],
+			provincia=data['envio']['provincia'],
+			codigo_postal=data['envio']['codigo_postal'],
+			)
+	else:
+		print('User is not logged in')
+
+	return JsonResponse('Payment submitted..', safe=False)

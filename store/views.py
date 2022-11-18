@@ -3,6 +3,8 @@ from django.http import JsonResponse
 import json
 import datetime
 from .models import * 
+from . utils import cookieCart
+
 # Create your views here.
 
 def store(request):
@@ -13,10 +15,8 @@ def store(request):
 		items = pedido.productopedido_set.all()
 		cartItems = pedido.get_cart_items
 	else:
-		#Create empty cart for now for non-logged in user
-		items = []
-		pedido = {'get_cart_total':0, 'get_cart_items':0, 'envio':False}
-		cartItems = pedido['get_cart_items']
+		cookieData = cookieCart(request) # we can access whats in utils through request method
+		cartItems = cookieData['cartItems']
 		
 	productos = Producto.objects.all()
 	context = {'productos':productos, 'cartItems':cartItems}
@@ -30,10 +30,10 @@ def cart(request):
 		items = pedido.productopedido_set.all()
 		cartItems = pedido.get_cart_items
 	else:
-		#Create empty cart for now for non-logged in user
-		items = []
-		pedido = {'get_cart_total':0, 'get_cart_items':0,'envio':False}
-		cartItems = pedido['get_cart_items']
+		cookieData = cookieCart(request) # we can access whats in utils through request method
+		cartItems = cookieData['cartItems']
+		pedido = cookieData['pedido'] # This took me a while to realise it was wrong
+		items = cookieData['items']
 
 	context = {'items':items, 'pedido':pedido,'cartItems':cartItems}
 	return render(request, 'store/cart.html', context)
@@ -45,10 +45,10 @@ def checkout(request):
 		items = pedido.productopedido_set.all()
 		cartItems = pedido.get_cart_items
 	else:
-		#Create empty cart for now for non-logged in user
-		items = []
-		pedido = {'get_cart_total':0, 'get_cart_items':0, 'envio':False}
-		cartItems = pedido['get_cart_items']
+		cookieData = cookieCart(request) # we can access whats in utils through request method
+		cartItems = cookieData['cartItems']
+		pedido = cookieData['pedido']
+		items = cookieData['items']
 
 	context = {'items':items, 'pedido':pedido,'cartItems':cartItems}
 	return render(request, 'store/checkout.html', context)

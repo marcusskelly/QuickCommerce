@@ -57,7 +57,7 @@
     if (cart == undefined) {
       cart = {}
       console.log('Cart Created!', cart)
-      document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/" //has to be key-value pair, cant be a JS object so needs to be stringified
+      document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/" //has to be key-value pair, cant be a JS object so needs to be stringified //Sets cookie in whatever page we are on
     }
     console.log('Cart:', cart)
 

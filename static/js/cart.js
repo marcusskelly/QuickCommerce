@@ -30,7 +30,7 @@ function updateUserOrder(productoId, action){
 			mode: 'cors',
 			headers:{
 				'Accept': 'application/json, text/plain, */*',
-				'Content-Type':'application/json', //este linea importantisima para el post
+				'Content-Type':'application/json', //esta linea importantisima para el post
 				'X-CSRFToken':csrftoken,
 			}, 
 			body:JSON.stringify({'productoId':productoId, 'action':action})

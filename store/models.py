@@ -37,7 +37,7 @@ class Pedido(models.Model):
 	codigo_transaccion = models.CharField(max_length=100, null=True)
 
 	def __str__(self):
-		return str(self.codigo_transaccion)
+		return str(self.id)
 
 	@property
 	def envio(self):

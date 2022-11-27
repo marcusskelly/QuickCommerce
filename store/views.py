@@ -1,20 +1,99 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from django.shortcuts import render,redirect
+from django.http import JsonResponse, HttpResponse
 import json
 import datetime
+from django.contrib import messages
 from .models import * 
 from . utils import cookieCart, cartData, guestOrder
+from .filters import OrderFilter
+from .forms import OrderForm,CreateUserForm
+from django.contrib.auth.forms import UserCreationForm
+
+from django.contrib.auth import authenticate,login,logout
+
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+
+def registerPage(request):
+	if request.user.is_authenticated:
+		return redirect('store')
+	else:
+		form = CreateUserForm()
+		if request.method == 'POST':
+			form = CreateUserForm(request.POST)
+			if form.is_valid():
+				form.save()
+				user = form.cleaned_data.get('username')
+				messages.success(request, 'Account was created for ' + user)
+				return redirect('login')
+
+		context = {'form':form}
+		return render(request, 'store/register.html',context)
+
+def loginPage(request):
+	if request.user.is_authenticated:
+		return redirect('store')
+	else:
+		if request.method == 'POST':
+			username = request.POST.get('username')
+			password = request.POST.get('password')
+
+			user = authenticate(request, username=username, password=password)
+
+			if user is not None:
+				login(request, user)
+				return redirect('store')
+			else:
+				messages.info(request, 'Username or password is incorrect')
+				
+		context = {}
+		return render(request, 'store/login.html',context)
+
+def logoutUser(request):
+	logout(request)
+	return redirect('login')
 
 def store(request):
 
 	data = cartData(request) # we can access whats in utils through request method. 
 	cartItems = data['cartItems']
-		
 	productos = Producto.objects.all()
-	context = {'productos':productos, 'cartItems':cartItems}
+
+	myFilter = OrderFilter(request.GET,queryset=productos)
+
+	productos = myFilter.qs	
+	
+	context = {'productos':productos, 'cartItems':cartItems,'myFilter':myFilter}
 	return render(request, 'store/store.html', context)
+
+@login_required(login_url='login')
+def dashBoard(request):
+	orders = Pedido.objects.all()
+	customers = Cliente.objects.all()
+
+	total_customers = customers.count()
+
+	total_orders = Pedido.objects.all().count()
+
+
+
+	context = {'customers':customers, 'orders':orders,
+	'total_customers':total_customers,'total_orders':total_orders}
+	return render(request, 'store/dashboard.html', context)
+
+def customer(request,pk):
+	
+	cliente = Cliente.objects.get(id=pk)
+	data = cartData(request)
+	items = data['items'] # try to access products that have been registered for that order and print them in the interface
+	pedido= cliente.pedido_set.all()
+	
+	total_orders = pedido.count()
+
+
+	context={'cliente':cliente, 'pedido':pedido, 'total_orders':total_orders,'items':items}
+	return render(request, 'store/customer.html',context)
 
 def cart(request):
 

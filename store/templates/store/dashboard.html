@@ -1,0 +1,51 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+
+{% include 'store/status.html' %}
+
+<br>
+
+<div class="row">
+	<div class="col-md-5">
+		<h5>CUSTOMERS: {{total_customers}}</h5>
+		<hr>
+		<div class="card card-body"> 
+			<table class="table table-sm">
+				<tr>
+					<th></th>
+					<th>Customer</th>
+					<th>Orders</th>
+				</tr>
+				{% for customer in customers %}
+					<tr>
+						<!--<td><a href="{% url 'customer' cliente.id %}" class="btn btn-sm btn-info">View</a></td>-->
+						<td>{{customer.nombre}}</td>
+						<td>{{customer.email}}</td>
+					</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+
+	<div class="col-md-7">
+		<h5>LAST 5 ORDERS</h5>
+		<hr>
+		<div class="card card-body">
+			<table class="table table-sm">
+				<tr>
+					<th>Producto</th>
+					<th>Precio</th>
+				</tr>
+				{% for item in items %}
+					<tr>
+						<td>{{item.producto.nombre}}</td>
+						<td>{{item.producto.nombre}}</td>
+					</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+
+</div>
+{% endblock content %}

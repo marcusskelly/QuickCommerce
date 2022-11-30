@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse
 import json
 import datetime
 from django.contrib import messages
+from django.contrib.auth.models import Group
 from .models import * 
 from . utils import cookieCart, cartData, guestOrder
 from .filters import OrderFilter
@@ -13,28 +14,36 @@ from django.contrib.auth import authenticate,login,logout
 
 from django.contrib.auth.decorators import login_required
 
+from .forms import CreateUserForm,OrderForm
+
+from .decorators import unathenticated_user,allowed_users, admin_only
+
 # Create your views here.
 
+
+@unathenticated_user
 def registerPage(request):
-	if request.user.is_authenticated:
-		return redirect('store')
-	else:
+	
 		form = CreateUserForm()
 		if request.method == 'POST':
 			form = CreateUserForm(request.POST)
 			if form.is_valid():
-				form.save()
-				user = form.cleaned_data.get('username')
+				user = form.save()
+				cliente = request.user.cliente
+				"""  
+				username = form.cleaned_data.get('username')
+				group = Group.objects.get(name='customer')
+				user.groups.add(group)
+				"""
 				messages.success(request, 'Account was created for ' + user)
 				return redirect('login')
 
 		context = {'form':form}
 		return render(request, 'store/register.html',context)
 
+@unathenticated_user
 def loginPage(request):
-	if request.user.is_authenticated:
-		return redirect('store')
-	else:
+ 	
 		if request.method == 'POST':
 			username = request.POST.get('username')
 			password = request.POST.get('password')
@@ -43,6 +52,7 @@ def loginPage(request):
 
 			if user is not None:
 				login(request, user)
+				cliente = request.user.cliente
 				return redirect('store')
 			else:
 				messages.info(request, 'Username or password is incorrect')
@@ -68,6 +78,7 @@ def store(request):
 	return render(request, 'store/store.html', context)
 
 @login_required(login_url='login')
+@admin_only
 def dashBoard(request):
 	orders = Pedido.objects.all()
 	customers = Cliente.objects.all()

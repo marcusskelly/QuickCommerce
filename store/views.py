@@ -29,13 +29,13 @@ def registerPage(request):
 			form = CreateUserForm(request.POST)
 			if form.is_valid():
 				user = form.save()
-				cliente = request.user.cliente
-				"""  
 				username = form.cleaned_data.get('username')
 				group = Group.objects.get(name='customer')
 				user.groups.add(group)
-				"""
-				messages.success(request, 'Account was created for ' + user)
+
+				
+				
+				messages.success(request, 'Account was created for ' + str(user))
 				return redirect('login')
 
 		context = {'form':form}
@@ -52,7 +52,8 @@ def loginPage(request):
 
 			if user is not None:
 				login(request, user)
-				cliente = request.user.cliente
+				cliente, created = Cliente.objects.get_or_create(nombre=username)
+				cliente.save()
 				return redirect('store')
 			else:
 				messages.info(request, 'Username or password is incorrect')

@@ -30,10 +30,13 @@ def registerPage(request):
 			if form.is_valid():
 				user = form.save()
 				username = form.cleaned_data.get('username')
+				email = form.cleaned_data.get('email')
 				group = Group.objects.get(name='customer')
 				user.groups.add(group)
 
-				
+				cliente, created = Cliente.objects.get_or_create(usuario=user)
+				cliente.nombre = username
+				cliente.email = email
 				
 				messages.success(request, 'Account was created for ' + str(user))
 				return redirect('login')
@@ -161,6 +164,7 @@ def processOrder(request): # This method will create an order regardless of the 
 	if request.user.is_authenticated:
 		cliente = request.user.cliente
 		pedido, created = Pedido.objects.get_or_create(cliente=cliente, completo=True) # inserts one record into table Pedido
+		pedido.save()
 		
 	else:
 		

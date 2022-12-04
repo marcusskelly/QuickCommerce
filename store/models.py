@@ -10,7 +10,7 @@ class Cliente(models.Model):
 	email = models.CharField(max_length=200)
 
 	def __str__(self):
-		return self.nombre
+		return str(self.nombre) # Fix error when checking admin panel for cliente
 
 class Producto(models.Model):
 	nombre = models.CharField(max_length=200)

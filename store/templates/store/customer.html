@@ -40,15 +40,17 @@
 		<div class="card card-body">
 			<table class="table table-sm">
 				<tr>
-					<th>Product</th>
-					<th>Category</th>
-					<th>Date Orderd</th>
+					<th>Producto</th>
+					<th>Precio</th>
+					<th>Cantidad</th>
+					<th>Total</th>
 				</tr>
 				{% for item in items %}
 					<tr>
 						<td>{{item.producto.nombre}}</td>
 						<td>{{item.producto.precio|floatformat:2}}€</td>
-						<td>{{item.get_total|floatformat:2}}€</td>
+						<td>{{item.cantidad}}</td>
+						<td>{{item.get_total}}€</td>
 					</tr>
 				{% endfor %}
 			</table>

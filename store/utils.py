@@ -52,6 +52,7 @@ def cartData(request): # This function calls cookieCart() function which contain
 		pedido, created = Pedido.objects.get_or_create(cliente=cliente, completo=False)
 		items = pedido.productopedido_set.all()
 		cartItems = pedido.get_cart_items
+		
 	else:
 		cookieData = cookieCart(request) # we can access whats in utils through request method
 		cartItems = cookieData['cartItems']
@@ -80,7 +81,7 @@ def guestOrder(request,data):
 		productoPedido = ProductoPedido.objects.create(
 			producto=producto,
 			pedido=pedido,
-			cantidad=item['cantidad'] 
+			cantidad=(item['cantidad'] if item['quantity']>0 else -1*item['quantity']),
 			) # With these lines we assign productos to productoPedido that eventually will be added to an order
 
 	return cliente,pedido

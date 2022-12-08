@@ -6,4 +6,4 @@ class OrderFilter(django_filters.FilterSet):
     class Meta:
         model = Producto
         fields = '__all__'
-        exclude = ['imagen']
+        exclude = ['imagen','nombre']

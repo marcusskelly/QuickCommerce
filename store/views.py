@@ -34,9 +34,8 @@ def registerPage(request):
 				group = Group.objects.get(name='customer')
 				user.groups.add(group)
 
-				cliente, created = Cliente.objects.get_or_create(usuario=user)
-				cliente.nombre = username
-				cliente.email = email
+				cliente, created = Cliente.objects.get_or_create(usuario=user,nombre=username,email=email)
+				
 				
 				messages.success(request, 'Account was created for ' + str(user))
 				return redirect('login')
@@ -55,8 +54,8 @@ def loginPage(request):
 
 			if user is not None:
 				login(request, user)
-				cliente, created = Cliente.objects.get_or_create(nombre=username)
-				cliente.save()
+				#cliente, created = Cliente.objects.get_or_create(nombre=username)
+				#cliente.save()
 				return redirect('store')
 			else:
 				messages.info(request, 'Username or password is incorrect')
@@ -126,6 +125,7 @@ def checkout(request):
 	cartItems = data['cartItems']
 	pedido = data['pedido']
 	items = data['items']
+	print(pedido.get_cart_total,type(pedido.get_cart_total))
 
 	context = {'items':items, 'pedido':pedido,'cartItems':cartItems}
 	return render(request, 'store/checkout.html', context)
@@ -143,6 +143,8 @@ def updateItem(request):
 	pedido, created = Pedido.objects.get_or_create(cliente=cliente, completo=False)
 
 	productoPedido, created = ProductoPedido.objects.get_or_create(pedido=pedido, producto=producto)
+
+	print(pedido.get_cart_total,type(pedido.get_cart_total))
 
 	if action == 'add':
 		productoPedido.cantidad = (productoPedido.cantidad + 1)
@@ -164,28 +166,31 @@ def processOrder(request): # This method will create an order regardless of the 
 	if request.user.is_authenticated:
 		cliente = request.user.cliente
 		pedido, created = Pedido.objects.get_or_create(cliente=cliente, completo=True) # inserts one record into table Pedido
-		pedido.save()
+		print(pedido.get_cart_total,type(pedido.get_cart_total))
 		
+	
 	else:
 		
 		cliente, pedido = guestOrder(request,data) # adds value to these two variables (cliente, pedido) from function guestOrder()
 
-		total = float(data['form']['total']) # We get the total value from the form in the fetch call 
-		pedido.codigo_transaccion = codigo_transaccion
+	total = float(data['form']['total']) # We get the total value from the form in the fetch call 
+	print(pedido.get_cart_total,type(pedido.get_cart_total))
+	print(total,type(total))
+	pedido.codigo_transaccion = codigo_transaccion
+	if total == float(pedido.get_cart_total):
+		print('totals match')
+		pedido.completo = True
+	pedido.save() # With these lines we make sure that an order is created regardless of the condition of being a guest user or registered
 
-		if total == pedido.get_cart_total:
-			pedido.completo = True
-		pedido.save() # With these lines we make sure that an order is created regardless of the condition of being a guest user or registered
-
-		# Si el pedido contiene productos no digitales, se crea un registro en tabla DireccionPedido
-		if pedido.envio == True:
-			DireccionPedido.objects.create(
-			cliente=cliente,
-			pedido=pedido,
-			direccion=data['envio']['direccion'],
-			ciudad=data['envio']['ciudad'],
-			provincia=data['envio']['provincia'],
-			codigo_postal=data['envio']['codigo_postal'],
-			)
+	# Si el pedido contiene productos no digitales, se crea un registro en tabla DireccionPedido
+	if pedido.envio == True:
+		DireccionPedido.objects.create(
+		cliente=cliente,
+		pedido=pedido,
+		direccion=data['envio']['direccion'],
+		ciudad=data['envio']['ciudad'],
+		provincia=data['envio']['provincia'],
+		codigo_postal=data['envio']['codigo_postal'],
+		)
 
 	return JsonResponse('Payment submitted..', safe=False)

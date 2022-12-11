@@ -34,9 +34,7 @@ def registerPage(request):
 				group = Group.objects.get(name='customer')
 				user.groups.add(group)
 
-				cliente, created = Cliente.objects.get_or_create(usuario=user)
-				cliente.nombre = username
-				cliente.email = email
+				cliente, created = Cliente.objects.get_or_create(usuario=user,nombre=username,email=email)
 				
 				messages.success(request, 'Account was created for ' + str(user))
 				return redirect('login')
@@ -55,8 +53,8 @@ def loginPage(request):
 
 			if user is not None:
 				login(request, user)
-				cliente, created = Cliente.objects.get_or_create(nombre=username)
-				cliente.save()
+				#cliente, created = Cliente.objects.get_or_create(nombre=username)
+				#cliente.save()
 				return redirect('store')
 			else:
 				messages.info(request, 'Username or password is incorrect')

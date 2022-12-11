@@ -1,61 +1,205 @@
 {% extends 'store/main.html' %}
+{% load static %}
 {% block content %}
 
-
-
-<br>
-
 <div class="row">
-	<div class="col-md">
-		<div class="card card-body">
-			<h5>Customer: {{cliente.nombre}}</h5>
-			<hr>
-		</div>
-	</div>
+    <div class="col-lg-6">
+        <div class="box-element" id="form-wrapper">
+            <form id="form">
+                <div id="user-info">
 
-	<div class="col-md">
-		<div class="card card-body">
-			<h5>Contact Information</h5>
-			<hr>
-			<p>Email:  {{cliente.email}}</p>
-		</div>
-	</div>
+                    <div class="form-field">
+                        <input required class="form-control" type="text" name="nombre" placeholder="Name.."> <!-- Error garrafal aquí porque en el submitForm no cogía el .value-->
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" type="email" name="email" placeholder="Email..">
+                    </div>
 
-	<div class="col-md">
-		<div class="card card-body">
-			<h5>Total Orders</h5>
-			<hr>
-			<h1 style="text-align: center;padding: 10px">{{total_orders}}</h1>
-		</div>
-	</div>
+                </div>
+
+                <div id="shipping-info">
+
+                    <hr>
+                    <p>Shipping Information:</p>
+                    <hr>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="direccion" placeholder="Direccion">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="ciudad" placeholder="Ciudad">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="provincia" placeholder="Provincia">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="codigo_postal" placeholder="Codigo postal">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="pais" placeholder="Pais">
+                    </div>
+
+                </div>
+
+                <hr>
+                <input id ="form-button" class= "btn btn-success btn-block" type="submit" value="Continue">
+            </form>
+        </div>
+        <br>
+
+        <div class="box-element hidden" id="payment-info">
+            <small>Paypal options</small>
+			<!-- Set up a container element for the button -->
+			<div id="paypal-button-container"></div>
+           <!-- <button id="make-payment">Make payment</button>-->
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="box-element" id="form-wrapper">
+            <a  class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
+				<hr>
+				<h3>Order Summary</h3>
+				<hr>
+                {% for item in items %}
+				<div class="cart-row">
+					<div style="flex:2"><img class="row-image" src="{{item.producto.imagen.url}}"></div>
+					<div style="flex:2"><p>{{item.producto.nombre}}</p></div>
+					<div style="flex:1"><p>{{item.producto.precio|floatformat:2}}€</p></div>
+					<div style="flex:1"><p>x{{item.cantidad}}</p></div>
+				</div>
+                {% endfor %}
+				<h5>Items: {{pedido.get_cart_items}}</h5>
+				<h5>Total: {{pedido.get_cart_total|floatformat:2}}€</h5>
+
+        </div>
+    </div>
 </div>
+<!-- Include the PayPal JavaScript SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=AaYzgi-Xp806GI4uTiJ5hBoKcSmjZAWfaCqSSMIHsOqFZJ-eOHmp9ABM2P2iBbW8M2AjewOmGeZJhhO2&currency=USD&disable-funding=sofort"></script>
+<script>
+	var total = '{{pedido.get_cart_total}}'
+	// Render the PayPal button into #paypal-button-container
+	paypal.Buttons({
+
+		style:{
+			color: 'blue',
+			shape: 'pill',
+		},
+		// Set up the transaction
+		createOrder: function(data, actions) {
+			return actions.order.create({
+				purchase_units: [{
+					amount: {
+						value: parseFloat(total).toFixed(2)
+					}
+				}]
+			});
+		},
+
+		// Finalize the transaction
+		onApprove: function(data, actions) {
+			return actions.order.capture().then(function(orderData) {
+				submitFormData()
+				
+
+				// Replace the above to show a success message within this page, e.g.
+				// const element = document.getElementById('paypal-button-container');
+				// element.innerHTML = '';
+				// element.innerHTML = '<h3>Thank you for your payment!</h3>';
+				// Or go to another URL:  actions.redirect('thank_you.html');
+			});
+		}
 
 
-<br>
+	}).render('#paypal-button-container');
+</script>
+<script>
+    var envio = '{{pedido.envio}}'
+		
+		if (envio == 'False'){
+		 	document.getElementById('shipping-info').innerHTML = ''
+		}
 
-<br>
+        if (user != 'AnonymousUser'){
+		 	document.getElementById('user-info').innerHTML = ''
+		 }
 
-<div class="row">
-	<div class="col-md">
-		<div class="card card-body">
-			<table class="table table-sm">
-				<tr>
-					<th>Product</th>
-					<th>Category</th>
-					<th>Date Orderd</th>
-				</tr>
-				{% for item in items %}
-					<tr>
-						<td>{{item.producto.nombre}}</td>
-						<td>{{item.producto.precio|floatformat:2}}€</td>
-						<td>{{item.get_total|floatformat:2}}€</td>
-					</tr>
-				{% endfor %}
-			</table>
-		</div>
-	</div>
-</div>
-	
+		if (envio == 'False' && user != 'AnonymousUser'){
+			    //Hide entire form if user is logged in and shipping is false
+				document.getElementById('form-wrapper').classList.add("hidden");
+				//Show payment if logged in user wants to buy an item that does not require shipping
+			    document.getElementById('payment-info').classList.remove("hidden");
+		}
 
+		
 
+        var form = document.getElementById('form')
+        form.addEventListener('submit', function(e){
+	    	e.preventDefault()
+	    	console.log('Form Submitted...')
+	    	document.getElementById('form-button').classList.add("hidden");
+	    	document.getElementById('payment-info').classList.remove("hidden");
+	    })
+
+		/*
+		
+        document.getElementById('make-payment').addEventListener('click', function(e){
+	    	submitFormData()
+	    })
+		*/
+
+	    function submitFormData(){
+	    	console.log('Payment button clicked')
+        
+            var userFormData = {
+				'nombre':null,
+				'email':null,
+				'total':total,
+			}
+
+			var shippingInfo = {
+				'direccion':null,
+				'ciudad':null,
+				'provincia':null,
+				'codigo_postal':null,
+			}
+
+			if (envio != 'False'){ // Collects values from form and eventually saves them into database
+	    		shippingInfo.direccion = form.direccion.value
+		    	shippingInfo.ciudad = form.ciudad.value
+		    	shippingInfo.provincia = form.provincia.value
+		    	shippingInfo.codigo_postal = form.codigo_postal.value
+	    	}
+
+	    	if (user == 'AnonymousUser'){
+	    		userFormData.nombre = form.nombre.value
+	    		userFormData.email = form.email.value
+	    	}
+
+	    	console.log('Shipping Info:', shippingInfo)
+	    	console.log('User Info:', userFormData)
+
+            //Same as adding products to cart
+            var url = "/process_order/"
+	    	fetch(url, {
+	    		method:'POST',
+	    		headers:{
+	    			'Content-Type':'applicaiton/json',
+	    			'X-CSRFToken':csrftoken,
+	    		}, 
+	    		body:JSON.stringify({'form':userFormData, 'envio':shippingInfo}),
+	    		
+	    	})
+	    	.then((response) => response.json())
+	    	.then((data) => {
+				  console.log('Success:', data);
+				  alert('Transaction completed');
+
+				  cart = {} // Function SubmitFormData is triggered and cart cookie is cleared
+				  document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/"
+				  window.location.href = "{% url 'store' %}"
+
+				})
+            }
+</script>
 {% endblock content %}

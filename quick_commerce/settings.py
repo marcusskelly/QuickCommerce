@@ -41,6 +41,8 @@ INSTALLED_APPS = [
 
     'store',
 
+    'storages',
+
     'django_filters',
 ]
 
@@ -120,6 +122,22 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
+
+#S3 buckets config
+
+AWS_ACCESS_KEY_ID='AKIAUI2CZ5VKJ57ZLVV4'
+AWS_SECRET_KEY_ACCESS='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'
+AWS_STORAGE_BUCKET_NAME='quick-commerce-app'
+
+
+AWS_S3_FILE_OVERWRITE=False
+AWS_DEFAULT_ACL=None
+DEFAULT_FILE_STORAGE='storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+""" 
+<
+"""
 
 
 # These 3 lines solved the issue about the static files

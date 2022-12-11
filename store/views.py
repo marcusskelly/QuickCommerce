@@ -142,6 +142,8 @@ def updateItem(request):
 
 	productoPedido, created = ProductoPedido.objects.get_or_create(pedido=pedido, producto=producto)
 
+	print(pedido.get_cart_total,type(pedido.get_cart_total))
+
 	if action == 'add':
 		productoPedido.cantidad = (productoPedido.cantidad + 1)
 	elif action == 'remove':
@@ -162,6 +164,7 @@ def processOrder(request): # This method will create an order regardless of the 
 	if request.user.is_authenticated:
 		cliente = request.user.cliente
 		pedido, created = Pedido.objects.get_or_create(cliente=cliente, completo=True) # inserts one record into table Pedido
+		print(pedido.get_cart_total,type(pedido.get_cart_total))
 		pedido.save()
 		
 	else:
@@ -169,9 +172,12 @@ def processOrder(request): # This method will create an order regardless of the 
 		cliente, pedido = guestOrder(request,data) # adds value to these two variables (cliente, pedido) from function guestOrder()
 
 		total = float(data['form']['total']) # We get the total value from the form in the fetch call 
+		print(pedido.get_cart_total,type(pedido.get_cart_total))
+		print(total,type(total))
 		pedido.codigo_transaccion = codigo_transaccion
 
 		if total == pedido.get_cart_total:
+			print('totals match')
 			pedido.completo = True
 		pedido.save() # With these lines we make sure that an order is created regardless of the condition of being a guest user or registered
 

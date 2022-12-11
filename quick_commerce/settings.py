@@ -135,13 +135,12 @@ AWS_DEFAULT_ACL=None
 DEFAULT_FILE_STORAGE='storages.backends.s3boto3.S3Boto3Storage'
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-""" 
-<
-"""
+
 
 
 # These 3 lines solved the issue about the static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [

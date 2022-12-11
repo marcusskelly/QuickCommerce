@@ -123,7 +123,7 @@ USE_TZ = True
 
 
 # These 3 lines solved the issue about the static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/images')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [

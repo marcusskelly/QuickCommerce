@@ -1,5 +1,8 @@
 # QuickCommerce
 
+## Live Demo:
+http://quick-commerce.com.es/
+
 ## Índice
 - [1.1 Introducción](#introduccion) 															
 - [1.2 Justificación del proyecto](#justificacion)  						       	   	  

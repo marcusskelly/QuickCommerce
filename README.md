@@ -332,7 +332,7 @@ Sin embargo, una de las partes más interesantes de este proyecto es la idea de 
 
    Imagen 10.3.Representación de la  las funciones que organizan a usuarios en grupos 
     Con estas tres funciones podemos manejar el flujo de acceso de un usuario a la plataforma dependiendo de a qué grupos pertenezca.
-     ```
+ 
         Test:
         Create a user through register.html
         Result => User created successfully
@@ -342,7 +342,7 @@ Sin embargo, una de las partes más interesantes de este proyecto es la idea de 
         Result => Error message in interface
         Log in with user registered
         Result => Name of user shows up in navbar
-```
+        
 Process order with logged in user 
 Cookie not required for logged in user so conditional added just before cookie is created 
 

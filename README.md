@@ -361,90 +361,118 @@ In order to know whether user orders were being completed, a few prints were add
 <a name="implantacion_documentacion"></a>	
 ### 1.4.4 Implantación y documentación
 
-### Requisitos Hardware y Software aplicables
+Para windows se descargará un ejecutable con la version 3.10.6 de python que permite poder utilizar este lenguaje de progamación. En el caso de Ubuntu 22.04.1 LTS, python forma parte del sistema operativo, y no hay necesidad de instalarlo. 
 
-- Hardware:
-  - 2.00 GB de RAM.
-  - 3.00 GB de espacio libre en disco duro.
+El siguiente paso sería crear el directorio del proyecto
 
-- Navegadores soportados en móviles 
-  
-    |         | Chrome | Firefox | Safari |
-    | :------ |:------:| :-----: | :----: |
-    | Android | X      | X       | -      |
-    | iOS     | X      | X       | X      |
-    
-- Navegadores soportados en PC 
-  
-   |         | Chrome | Firefox | Opera | Safari |
-   | :------ |:------:| :-----: | :---: | :----: |
-   | Mac     | X      | X       | X     | X      |
-   | Windows | X      | X       | X     | -      |
-   | Linux   | X      | X       | X     | -      |
-    
-### Despliegue
-  
-El primer paso sería instalar JDK en el PC para compilar Java.
-https://www.filehorse.com/download/file/DyeXiKabQNFen5HV6tsDBrz0RtNWMpF3w3r8_O17VcIDUMz3sMOE8N9-3mdrukca1LyP2BiitgphwjAtbFGwnkOeEVEuAjD4kUU4BUz4aM4/
+mkdir quick_commerce
 
-Una vez instalado JDK, es necesario desplegar el documento docker-compose.yml. Este contiene lo necesario para desplegar un contenedor Mysql, el cual permite alojar la base de datos de la aplicación en el mismo.
+Después creariamos un virtualenv que nos permite aislar nuestro proyecto de la version de python y los paquetes de python que tenemos
 
+python3.7 -m venv ~/venv-ecommerce
+
+Se activa el virtualenv
+
+source ~/venv-ecommerce/bin/activate
+
+instalamos django
+
+pip install django
+
+creamos un archivo con los paquetes de python que 
+
+touch requirements.txt
+
+Django==3.2.12
+django-filter==22.1
+docker==6.0.0
+docker-compose==1.29.2
+dockerpty==0.4.1
+gunicorn==20.1.0
+httplib2==0.20.2
+jsonschema==3.2.0
+oauthlib==3.2.0
+olefile==0.46
+Pillow==9.0.1
+python-dateutil==2.8.1
+six==1.16.0
+sqlparse==0.4.2
+toml==0.10.2
+urllib3==1.26.5
+virtualenv==20.16.6
+whitenoise==6.2.0
+django-storages==1.13.1
+boto3==1.26.27
+
+finalmente creamos el proyecto 
+
+python3 manage.py startapp store
+
+para crear la base de datos en sqlite basta con ejecutar los siguientes comandos:
+
+python3 manage.py migrate
+
+python3 manage.py makemigrations
+
+create superuser by python manage.py createsuperuser
+
+Para arrancar el servidor de django
+
+python3 manage.py runserver
+
+### Entorno en produccion
+Primero empezaremos con la contratación de un servidor y un dominio. En este caso, el servidor será clouding.io el cual nos servirá la web en producción. El dominio contratado será http://quick-commerce.com.es/
+Se obtiene la IP del servidor y se accede mediante ssh root@161.22.41.179
+Una vez dentro, empezaremos a configurar apache para el proyecto django
+
+For apache, just do this: sudo apt-get install apache2, you can also add this
+sudo apt-get apache2.2-common apache2-mpm-prefork apache2-utils libexpat1
+For mod_wsgi, if you are using python 3, you should install mod_wsgi using
+sudo apt-get install libapache2-mod-wsgi-py3
+Una vez instalados todos estos paquetes, se configura el virtualhost para el proyecto
+sudo nano django.conf
 ```
-version: "3.9"
+    <VirtualHost *:80>
+        ServerName quick-commerce.com.es
+        ServerAlias www.quick-commerce.com.es
 
-services:
-  queval-mysql:
-    image: mysql
-    container_name: queval-mysql
-    ports: 
-      - "3306:3306"
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_ROOT_PASSWORD: quevedo
-      MYSQL_DATABASE: quevedodb
-      MYSQL_USER: quevedo
-      MYSQL_PASSWORD: quevedo
-    volumes:
-      - ./db-data:/var/lib/mysql
+        Alias /static /var/www/QuickCommerce-rama_prueba/static/
+        Alias /images /var/www/QuickCommerce-rama_prueba/static/images
+        Alias /static/admin/css /usr/local/lib/python3.8/dist-packages/django/c>
+        Alias /static/admin/js /usr/local/lib/python3.8/dist-packages/django/co>
 
-  queval-wildfly:
-    image: wildfly23
-    container_name: queval-wildfly
-    depends_on:
-      - queval-mysql
-    ports:
-      - "8080:8080"
-      - "9990:9990"
-      - "8787:8787"
-    volumes:
-      - ~/Proyectos/IdeaProjects/QUEval/target/docker:/opt/jboss/wildfly/standalone/deployments
-```
-Una vez desplegado el docker, y el contenedor esté corriendo adecuadamente, nos situaremos en el mismo directorio donde se encuentra el documento docker-compose.yml, y desplegamos el archivo .jar. java -jar Concesionario-0.0.1-SNAPSHOT.jar y arrancamos el proyecto Spring en nuestro IDE.
+        WSGIScriptAlias / /var/www/QuickCommerce-rama_prueba/quick_commerce/wsg>
+
+        <Directory /var/www/QuickCommerce-rama_prueba/>
+                Order deny,allow
+                Allow from all
+        </Directory>
+
+        DocumentRoot /var/www/QuickCommerce-rama_prueba
+     <VirtualHost>
+ ```
+
+Having understood, the code, you must disable the default virtual host config file i.e 000.default.conf, and enable the newly created virtual host config file and restart as shown below.
+A2dissite 000.default.conf
+sudo a2ensite django.conf
+service apache2 restart
+
+Once you get the “OK” message, you have more one thing to do, and that is telling apache to import your python project. The WSGIPythonPath line ensures that your project package is available for import on the Python path; in other words, that import my_project works.
+sudo nano /etc/apache2/apache2.conf
+WSGIPythonPath /var/www/QuickCommerce-rama_prueba
+sudo nano /etc/hosts que apunte desde la ip de servidor a la web 
 
 <a name="resultados_discusion"></a>	
 ### 1.4.5 Resultados y discusión
 
-El desarrollo de la aplicación comenzó con el desarrollo de varias interfaces con el fin de mostrar una serie de vehículos disponibles para alquiler. Después, se implementó la lógica de negocio que permitía la creación de nuevos vehículos disponibles para alquiler, además de la edición y eliminación de los ya existentes. Después de esto, se pasó al lado del diseño para ajustar márgenes y estilos, de manera que se consiguiera una interfaz llamativa e intuitiva para el usuario. A continuación, se pasó a la parte de la lógica de nuevo, para añadirle varias funcionalidades como es el sistema loggin que tiene incorporado en su módulo Spring Security, el cual nos permite acceder a ciertas partes de la plataforma solo si tenemos las credenciales necesarias, de lo contrario, solo podemos ver ciertas secciones de usuario. Además de esto, en la barra de navegación encontramos un buscador el cual se ayuda de consultas para mostrar los vehículos detallados en las mismas. Seguido de este buscador en la navegación, se implementó un campo de subida de archivos desde un equipo a la hora de crear nuevos vehículos por parte del administrador además de una sección de paginación disponible para la gestión de los mismos por parte del administrador.
-Con lo que respecta a los tiempos de finalización, se han cumplido los plazos estimados para la realización del proyecto, sin contar con las mejoras posteriores previas a la planificación del proyecto. La parte que más ha demorado la finalización del proyecto, involucraba a la sección de los alquileres por parte de un cliente de la plataforma. El cliente introducía la matrícula del vehículo que deseaba alquilar, y esta se guardaba en un carrito mediante una sesión iniciada en el controlador. A continuación, se confirmaba el alquiler, y se añadía a una interfaz visual, de manera que el cliente puede consultar su historial de alquileres. Por otro lado, la asignación de un carrito con su posterior confirmación para un cliente mediante su email, ha representado una dificultad adicional, ya que, de no ser así, la tabla “Usuario” hubiera sido inútil en este caso, ya que un cliente tiene que ser capaz de tener sus propios alquileres cuando está logueado en la plataforma. 
+El desarrollo de la aplicación comenzó con el desarrollo de varias interfaces con el fin de mostrar una serie de productos disponibles para compra. Después, se implementó la lógica de negocio que permitía la creación del carrito y el checkout. Seguidamente, se pasó al lado del diseño para ajustar márgenes y estilos, de manera que se consiguiera una interfaz llamativa e intuitiva para el usuario. A continuación, se pasó a la parte de la lógica de nuevo, para añadirle varias funcionalidades como es el sistema login que funciona con decoradores, el cual nos permite acceder a ciertas partes de la plataforma solo si tenemos las credenciales necesarias, de lo contrario, solo podemos ver ciertas secciones de usuario. Además de esto, en la barra de navegación encontramos un buscador el cual se ayuda de consultas para mostrar los productos digitales o fisicos. Seguido de estos desarrollos, se implementó la opción de que usuarios no registrados pudiesen comprar productos en la plataforma sin necesidad de loguearse. Esta última funcionalidad se llevó a cabo a través de cookies. Finalmente, se incluye una implementación de pago a través de paypal, la cual da mucha comodidad a los clientes a la hora de comprar productos. Con lo que respecta a los tiempos de finalización, se han cumplido los plazos estimados para la realización del proyecto, sin contar con las mejoras posteriores previas a la planificación del proyecto. La parte que más ha demorado la finalización del proyecto, involucraba  la distincion de los pedidos realizados por usuarios logueado o no logueados.  El problema venía en que para el cliente logueado, no se podía procesar un pedido de manera completa.  Esto se solventó sustituyendo una query de python por otra:  Pedido.objects.filter(cliente=cliente, completo=False).first(). Por otro lado, el despliegue de la aplicación en un entorno de desarrollo ha resultado ser un gran reto, habiendo probrado con 3 maneras distintas: heroku, pythonanywhere y apache. En la primera, los archivos estáticos no se servían correctamente, y se intentaron servir con s3 buckets de AWS sin éxito. Finalmente se consiguió el despliegue de las 3 maneras, pero se optó por apache, ya que no presentaba errores en los archivos estáticos en ningún momento, mientras que en los otros dos método si presentaba estos fallos da manera seguida.
 
-De cara al futuro, se contemplan mejoras en la funcionalidad de la aplicación como la introducción de sesiones de usuario para asemejar la plataforma a sus grandes competidores. Además, se pretende implementar una subida de ficheros modo drag & drop para mejorar la experiencia de usuario, incrementar el número de meses de los alquileres mediante un botón de manera sencilla. Con el uso de la sesión, se pretende mostrar los alquileres de un usuario según esté logueado en la plataforma, en vez de mostrar todos los realizados como es actualmente, ya que eso presenta una brecha de seguridad e intimidad para los demás usuarios de la plataforma. Se contempla la posibilidad de introducir cupones de descuento para ciertos usuarios a la hora de añadir coches a su lista de alquileres, de modo que incentive la compra, además de introducir un sistema de email de bienvenida cuando un usuario se registra en la plataforma, junto con un email de confirmación de alquiler. Por otro lado, con respecto a la interfaz de diseño, se pretende mejorar esta para crear una plataforma con mejor experiencia de usuario con respecto a sus competidores. Problablemente, esto se realice utilizando las últimas versiones de bootstrap, ya que ofrecen una librería extensa de estilos, normalmente adaptados a otros formatos de dispositivos.
+De cara al futuro se pretenden añadir mejoras en la aplicación, como la inserción de un filtro de precios que se realice mediante jquery y ajax, para mejorar la experiencia de usuario. También se pretende introducir un sistema de pago real a través de paypal. Por otro lado, se contempla incluir un dashboard para administradores del sitio web el cual permite consultar el listado de pedidos realizados de manera sencilla. Finalmente, el cliente también contaría con su propio dashboard para consultar el historial de pedidos realizados. 
 
 <a name="conclusion"></a>
 ## 1.5 Conclusiones
 
-El lenguaje de programación Java junto con el framework Spring, representan dos de las tecnologías más usadas a la hora de realizar desarrollo web. Esto junto con el motor de base de datos escogido y el lenguaje de marcas HTML junto con hojas de estilos CSS y herramientas de despliegue Docker, hacen de esta aplicación, un proyecto completo a la hora de obtener unas bases sólidas en programación. Durante el primer año realizado de este curso, se utilizaron las tecnologías previamente mencionadas, con la excepción de Spring. Sin embargo, durante el último año cursado, gracias a la implementación de este framework tan versátil junto con su motor de plantillas Thymeleaf en este proyecto, se han podido integrar todos los conocimientos previos en un proyecto de funcionalidad que se asemeja a plataformas actuales encontradas en la red. Esto quiere decir que se han obtenido conocimientos y habilidades enfocadas a un usuario, tanto en el apartado de funcionalidad para facilitar el uso de la plataforma, junto con el lado de diseño para así conseguir una buena experiencia de usuario. Asimismo, la realización del proyecto por etapas o “sprints” gracias al uso de la herramienta Taiga, ha supuesto un aprendizaje adicional respecto al lado de administración y organización, ya que actualmente la realización de proyectos basado en la metodología Scrum está muy presente en los equipos de desarrollo.
-
-<a name="referencias"></a>	
-## 1.6 Bibliografía y referencias
+El lenguaje de programación Python junto con el framework Django, representan dos de las tecnologías más usadas a la hora de realizar desarrollo web. Esto junto con el motor de base de datos escogido y el lenguaje de marcas HTML junto con hojas de estilos CSS y herramientas de despliegue en remoto, hacen de esta aplicación, un proyecto completo a la hora de obtener unas bases sólidas en programación. Durante el primer año realizado de este curso, se utilizaron las tecnologías previamente mencionadas, con la excepción de Python y Django. Durante la realización de este proyecto de manera autodidacta, y desviandose de tecnologías previamente utilizadas durante el curso, se ha pretendido innovar respecto a proyectos ya evaluados y gracias a esta apuesta por tecnologías alternativas se han podido integrar todos los conocimientos previos en un proyecto de funcionalidad que se asemeja a plataformas actuales encontradas en la red. Esto quiere decir que se han obtenido conocimientos y habilidades enfocadas a un usuario, tanto en el apartado de funcionalidad para facilitar el uso de la plataforma, junto con el lado de diseño para así conseguir una buena experiencia de usuario. Asimismo, la realización del proyecto por etapas o “sprints” gracias al uso de la herramienta Taiga, ha supuesto un aprendizaje adicional respecto al lado de administración y organización, ya que actualmente la realización de proyectos basado en la metodología Scrum está muy presente en los equipos de desarrollo.
 
 
-    1.  https://www.baeldung.com/ Guía completa Spring, Spring Security, Rest with Spring
-    2.  https://parzibyte.me/ Blog con herramientas y funciones de Spring para e-commerce
-    3.  https://www.jetbrains.com/ Documentación oficial del IDE Intellij
-    4.  https://www.mysql.com/ Documentación oficial MySQL
-    5.  https://www.docker.com/ Documentación oficial Docker
-    6.  https://www.thymeleaf.org/ Documentación oficial Thymeleaf
-    7.  https://www.adictosaltrabajo.com/ Portal con información para implementación de modulo Spring Security
-    8.  https://openwebinars.net/academia/ Portal con curso e información sobre Thymeleaf y Spring
-    9.  https://spring.io/ Documentación de Spring 
 

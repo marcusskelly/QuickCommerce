@@ -77,295 +77,215 @@ Se utilizará un motor de plantillas para implementar la interfaz visual. Por ot
   
   Imagen 1. Resumen de los casos de uso de la plataforma con dos tipos de usuarios: Cliente y administrador.
   
-  ![Imagen](ImagenesDocumentacion/UseCase2.PNG)
+  ![Imagen](https://user-images.githubusercontent.com/117280411/208067039-a0584dfd-0780-4f15-ad92-aa4e3311bc86.png)
   
   Imagen 2. Detalles de casos de uso de cada tipo de usuario.
   
   ### Diagrama E/R
   
-  ![Imagen](ImagenesDocumentacion/E-R.PNG)
+  ![Imagen](https://user-images.githubusercontent.com/117280411/208067254-a86031d7-e587-4a32-9ab2-a429569ae6b5.png)
  
- Imagen 3. Detalles de las 4 tablas principales usadas en la plataforma junto con sus relaciones.
+ Imagen 3. Detalles de las tablas principales usadas en la plataforma junto con sus relaciones.
   
-    • La aplicación constará de un menú principal en el cual un usuario no registrado puede ver los coches disponibles, mandar formulario de contacto y registrarse   como cliente o administrador, en una ventana nueva. Además, también puede ver los detalles de un coche, en una ventana adicional.
-    • El usuario de tipo cliente podrá ver el historial de alquileres realizados, cancelar un alquiler y ver sus facturas.
-    • El usuario de tipo cliente podrá alquilar coches ingresando la matrícula del mismo, pudiendo alquilar un mismo coche varios meses, o alquilar varios coches durante x número de meses.
-    • Tanto un cliente como administrador tendrán la posibilidad de filtrar coches por medio de un buscador situado en la navegación de la página principal.
-    • El usuario de tipo administrador, tendrá acceso a varias pantallas que no ven los demás usuarios como editar coche, ver usuarios, ver alquileres totales y registrar coches nuevos.
+     • La tabla User es parte del modelo de Django.
+    • Por otro lado, un User puede convertirse en cliente una vez que realiza una compra y está registrado en la plataforma. Cliente y User mantienen una relación OneToOne.
+    • La tabla Producto representa los productos actuales que se encuentran en stock.
+    • La tabla Pedido representa una transacción que se ha llevado a cabo o se va a llevar a cabo. Contiene un codigo de transacción, y mantiene una relación con cliente de ManyToOne.
+    • La tabla ProductoPedido contiene productos que un cliente ha ido pidiendo y añadiendo al carrito. Por tanto, estos productos pedidos se añaden a la tabla pedido una vez que el usuario desea finalizar la compra. Mantiene una relacion ManyToOne con la tabla Pedido.
+    • Por otro lado, la tabla Producto contiene información sobre los productos disponibles. Tiene una relación ManyToOne con ProductoPedido.
+    • Finalmente, la tabla DireccionPedido se encarga de almacenar la información sobre la direccion de reparto de un pedido. No todos los pedidos requieren de reparto, ya que algunos productos tienen formato digital. Mantiene una relación ManyToOne con Pedido. 
 
 ### Prototipado
 
 ### Home
 
-  ![Imagen](ImagenesDocumentacion/CapturaHome.PNG)
+  ![Imagen](https://user-images.githubusercontent.com/117280411/208067573-6236b711-7d61-4227-9787-5c0b868ca346.png)
   
   Imagen 4. Representación de pantalla principal de la plataforma con varios enlaces y botones que redirigen a otras secciones.
 
-    • En la home principal encontramos el título del portal y un logo del mismo.
-    • Un usuario puede iniciar sesión por medio del input, además de ser redirigido a otra ventana para registrarse.
-    • Aparece información de contacto, además de la barra de navegación junto con un buscador.
-    • Finalmente, un usuario puede ver los coches disponibles para alquilar.
-    • El usuario también puede mandar una consulta a través del formulario que se encuentra en el footer de la página principal.
+        • Un usuario puede añadir productos al carrito mediante el botón “add to cart”, además de ver detalles de los productos mediante el botón “view”.
+        • Un usuario tiene la opción de loguearse en la plataforma, y comprar productos. Sin embargo, no es necesario estar logueado en la plataforma para comprar productos.
+        • En la parte superior derecha, el usuario puede consultar el numero de productos totales que tiene en su carrito, además de dirigirse al mismo al realizar un click sobre este.
 
-### Alquilar
+### Carrito
 
-  ![Imagen](ImagenesDocumentacion/Alquilar.PNG)
+  ![Imagen](https://user-images.githubusercontent.com/117280411/208067788-e7d55e4a-9cea-4b56-b1ee-7dbc05ee8245.png)
   
-  Imagen 5. Representación de la interfaz de alquilar que permite añadir coches para un alquiler.
+  Imagen 5. Representación de vista de carrito en la cual se muestra un resumen de los productos a añadir al pedido
   
-    • En la interfaz alquilar, un usuario de tipo cliente podrá introducir la matrícula del coche en cuestión, y añadirla a su lista de alquileres.
-    • Se muestra el total que supondría la suma de los coches que se quieren alquilar, además de un desglose en una tabla subyacente de los detalles de los coches.
-    • Finalmente, la interfaz incluye la función de cancelar todos los alquileres mediante el botón “cancelar alquiler”, o quitarlos de manera individual mediante el botón de la tabla.
+        • Un usuario puede modificar la cantidad de productos que quiere agregar al pedido mediante las correspondientes flechas.
+        • El usuario puede volver a la pantalla de inicio, o dirigirse a la pantalla de checkout.
     
- ### Coches
+ ### Checkout
 
-  ![Imagen](ImagenesDocumentacion/CapturaCoches.PNG)
+  ![Imagen](https://user-images.githubusercontent.com/117280411/208068072-bf416a15-eb4a-45b7-b373-222d8e59cd72.png)
+
+ Imagen 6. Representación de vista de checkout en la que el cliente puede consultar su pedido final antes de confirmar el mismo.
  
- Imagen 6. Representación de la interfaz Coches, la cual permite al administrador ver la flota de coches.
-  
-    • En la interfaz coches, el usuario puede ver la selección de coches disponibles en la plataforma de una manera más detallada.
-    • El botón “agregar coche” redirige a la interfaz Agregar Coche, la cual permite la introducción en la plataforma de un nuevo vehículo disponible para alquilar.
-    • En la tabla que muestra la información de cada coche, también aparecen dos botones para editar un coche, o eliminarlo del sistema.
-    • Finalmente, la interfaz cuenta con un bloque de paginación, que permite en este caso navegar por los distintos vehículos de manera ordenada.
+      • Un usuario puede confirmar un pedido, además de agregar una dirección de envío a la que le pueden llegar los productos.
+      • Por otro lado, el usuario puede elegir un método de pago para realizar la compra.
     
- ### Alquileres
+ ### Paypal Payment Integration
 
-  ![Imagen](ImagenesDocumentacion/CapturaAlquileres.PNG)
+  ![Imagen](https://user-images.githubusercontent.com/117280411/208068370-5f4c12b3-6480-42c6-8aef-f9cd849dfa99.png)
   
-  Imagen 7. Interfaz de Alquileres la cual permite a un usuario ver su historial de alquileres.
+  Imagen 7.1. Representación de vista de checkout en la que el cliente puede consultar su pedido final antes de confirmar el mismo.
+     
+       • Un usuario puede elegir su forma de pago a través de PayPal, tarjeta de crédito, o una combinación de ambas y dividir el importe total.
+       
+    ![Imagen](https://user-images.githubusercontent.com/117280411/208068892-bd909bf6-08b3-4fac-aa93-1d3531b0ddf9.png)
   
-    • En la pantalla alquileres, se desglosan todos los alquileres que se han realizado en la plataforma mediante una tabla.
-    • La tabla muestra la fecha en la que tuvo lugar un alquiler, y los detalles de dicho alquiler como son la matrícula, los meses reservados, precio/mes y el total que se ha pagado.
-    • En el botón “Agregar a la lista” le redirige a uno a la interfaz Alquilar para poder añadir un alquiler.
-
- ### Agregar Coche
-
-  ![Imagen](ImagenesDocumentacion/CapturaAgregarCoche.PNG)
+  Imagen 7.2. Imagen que muestra el pago de los artículos por parte de un usuario en la plataforma.
   
-  Imagen 8. Interfaz para agregar coches a la plataforma mediante credenciales de administrador.
+      • PayPal permite dividir los pagos entre una cuenta y una tarjeta de crédito/débito.
+      • También incluye la opción de cambiar la dirección de envío.
+      
+      ![Imagen](https://user-images.githubusercontent.com/117280411/208069198-55aa2c1c-c4d2-43dc-9a9b-2fc37448a764.png)
   
-    • En Añadir coche, el administrador del portal podrá introducir un nuevo vehículo para alquilar mediante una serie de inputs.
-    • Entre estos campos, se incluye la inserción de fotos para los coches a través de archivos.
-    • Cuando los registros estén listos, el botón “Guardar” inserta en la base de datos un vehículo nuevo.
-    • El botón “Ver todos” redirige a la interfaz Ver todos, donde se muestran todos los coches disponibles en la plataforma hasta el momento.
-
- ### Añadir Usuario
-
-  ![Imagen](ImagenesDocumentacion/CapturaAgregar.PNG)
+  Imagen 7.3. Representación de pago alternativo por medio de tarjeta en un pedido
   
-  Imagen 9. Interfaz para añadir usuarios a la base de datos, disponible para administrador y usuarios.
-  
-    • En esta interfaz, tanto el usuario como el administrador podrán registrar a nuevos usuarios.
-    • Incluye la inserción de una contraseña con el formato “password” la cual identifica a los diferentes usuarios.
-    • Cuando los campos han sido rellenados, el botón “Guardar” registra un nuevo usuario en la plataforma.
-    • El boton “Volver al inicio” redirige al usuario al inicio de la plataforma.
+      • El usuario puede optar por pago a través de tarjeta mediante este formulario desplegable.
+      • De esta forma, se le permite al usuario disponer de varias opciones a la hora de comprar, lo que resulta en una mayor conversión de venta.
+ 
 
    <a name="diseño"></a>
    ### 1.4.2 Diseño
    
-   ![Imagen](ImagenesDocumentacion/CapturaBBDD.PNG)
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208069468-088d5f56-b9ea-44c3-b6bd-e918569a731b.png)
    
-   Imagen 10. Detalles de las tablas utilizadas. Imagen obtenida de DBeaver.
+   Imagen 8.1. Detalles de las tablas utilizadas. Imagen obtenida de DBeaver.direccion_pedido, pedido, user y cliente.
    
-    • La aplicación contiene 4 tablas, las cuales albergan toda la información necesaria para el funcionamiento de la misma.
-    • En primer lugar, la tabla coche permite mostrar un catálogo de coches de manera estática al usuario de la plataforma. El administrador de la plataforma se encarga de la gestión de los coches disponibles, así como la introducción de modelos nuevos.
-    • La tabla usuario tiene como finalidad identificar a los clientes de la plataforma a la hora de realizar alquileres.  Contiene información del cliente, de manera que el administrador puede consultar los clientes que han alquilado coches. 
-    • Por otro lado, la tabla alquiler registra la fecha y la hora en la cual se ha realizado un alquiler por parte de un cliente.
-    • Finalmente, la tabla coche_alquilado tiene una relación de ManyToOne con respecto a la tabla alquiler. De esta manera, los alquileres realizados son guardados y pueden ser consultados por el administrador.
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208069638-0b0c7320-fda1-4746-b6fa-7f0e1104a964.png)
+   
+   Imagen 8.2. Detalles de las tablas utilizadas. Imagen obtenida de DBeaver.direccion_pedido,producto_pedido, pedido y cliente.
+   
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208069772-49a83b13-591a-48ff-97b6-6fe507ba3a4c.png)
+   
+   Imagen 8.3. Detalles de las tablas utilizadas. Imagen obtenida de DBeaver.producto_pedido, producto y pedido.
+   
+     • La plataforma contiene 6 tablas las cuales contiene la información necesaria para el correcto funcionamiento de la mismo.
+     • Con referencia a la imagen 7.1, se puede distinguir la relación entre user y cliente, ya que una vez que un pedido ha sido confirmado, un user pasa a ser un cliente de la plataforma. Al mismo tiempo, se le asignará una dirección de pedido dependiendo del campo “digital” en la tabla producto.
+     • Por otro lado, en las imágenes 7.2 y 7.3, se muestra la relación entre los productos que se añaden a un carrito mediante la tabla producto_pedido, y estos mismos que se añaden a un pedido una vez confirmado el mismo, creándose así un registro de cliente y de dirección de pedido si se cumplen los requisitos.
 
  ### Tecnologías utilizadas
  
- La aplicación se desarrolla en su mayor parte usando el lenguaje Java, aunque contiene otras partes realizadas en lenguaje cliente Javascript.
+ La aplicación se desarrolla en su mayor parte en lenguaje Python, aunque contiene ciertas partes realizadas en JavaScript.
+Python es probablemente el lenguaje de programación más usado en la actualidad, además de estar presente en los Sistemas Operativos de Mac y Ubuntu que son los elegidos para el desarrollo de esta plataforma. Además, python es conocido por su migración sin problemas a versiones más nuevas y su sintaxis simple y fácil de aprender, que mejora la legibilidad y también reduce los costes de mantenimiento del software. Finalmente, el hecho de poder utilizar virtualenvs para el desarrollo de la plataforma, ha supuesto una gran ventaja, ya que ha permitido aislar el proyecto de los paquetes y las versiones de python existentes en los sistemas operativos utilizados, y así poder trabajar en el mismo proyecto desde dos equipos diferentes. 
 
-Cabe destacar que la utilización de software libre, con lo que se ahorra en concepto de licencias. Este Software es una de las tecnologías más usadas en la actualidad en el desarrollo de aplicaciones web debido a su fiabilidad y versatilidad. Otro punto a destacar, es que el lenguaje escogido va asociado al framework.
+Para el desarrollo de este proyecto, se ha utilizado el framework Django ya que es utilizado junto a python para el desarrollo de aplicaciones bajo el modelo vista controlador. Se barajó la posibilidad de utilizar otro framework de python como es Flask junto con su motor de plantillas Jinja2, pero este fue descartado ya que no admite páginas HTML dinámicas. La organización del proyecto con Django es la siguiente:
+      
+    • Models.py => Contiene las clases las cuales son mapeadas en forma de tablas por el ORM de Django hacia la base de datos.
+    • Views.py => Permite obtener una web request y devolver una web response que en este caso son los elementos HTML de los templates. 
+    
+    Además, en este proyecto se utilizarán funciones en views que devuelven una JsonResponse.
+    
+    • Urls.py => Contiene código python que permite el mapeo entre URL path expressions a las funciones situadas en views.py
+    • Templates => Este fichero aloja los archivos HTML que sirven como interfaz de usuario.
+    • Migrations => Contiene archivos.py con creacion de tablas, cambios en tablas, etc.  
+    
+Por otro lado, la introducción de JavaScript se encarga del manejo de datos de manera dinámica en la interfaz a través de funciones propias de este lenguaje como por ejemplo la recogida de datos de los formularios en html (shippingInfo.direccion = form.direccion.value). Esta información se almacena en variables para después ser enviada a views.py a través de JSONs, y ser procesadas en este archivo para finalmente ser alojada en BBDD.
 
-En este caso, el framework de desarrollo seleccionado es Spring Boot. Ha sido seleccionado por las siguientes razones:
+Finalmente, cabe destacar la introducción de Paypal como método de pago a la hora de realizar pedidos, ya sea a través de usuarios registrados, o a través de usuarios no registrados mediante cookies. Esta API nos permite simular lo que sería una transacción entre un cliente y una web, gracias a la previa introduccion de fecth API de JavaScript. El usuario puede elegir cómodamente sus métodos de pago, pudiendo incluso dividir el importe total del pedido entre su cuenta de Paypal, y su tarjeta de crédito. Esta implementación, le permite a Quickcommerce convertirse en una aplicación muy cómoda y fiable para el usuario en la que puede comprar tantas veces como desee. 
 
-        ◦ Es un framework gratuito, que implementa el Modelo-Vista-Controlador, lo cual es recomendable para el mantenimiento de aplicaciones.
-        ◦ Está implementado en el lenguaje Java, lo cual presenta una gran ventaja, ya que es uno de los lenguajes más extendidos en el mundo.
-        ◦ Existe una gran comunidad de desarrolladores Java, que utilizan Spring Boot como framework de desarrollo. Como consecuencia, se pueden encontrar multitud de módulos reutilizables ya probados que podemos añadir a nuestro código de manera sencilla.
-        ◦ Buena comunicación entre el front-end y el back-end, gracias a la utilización de Thymeleaf como motor de plantillas.
-        ◦ Organiza el proyecto en paquetes o módulos, los cuales cumplen una función dentro de la aplicación.
-
-            ▪ Configuración: En el caso de Spring Security, implementa la funcionalidad de login a una apliación mediante la anotación @Configuration.
-            ▪ Controlador: Se encarga de comunicar la arquitectura del proyecto, con el motor de plantillas, para que este pueda renderizar aquello que está programado con Java, mediante la anotación @Controller.
-            ▪ Modelo: Contiene las entidades de la plataforma, que a su vez son tablas en el motor de base de datos. Se utiliza la anotación @Entity.
-            ▪ Repositorios: Contiene interfaces, que junto con Jpa, añaden funcionalidades una vez implementadas por clases. Utilizan la anotación @Repository.
-            ▪ Servicios: Son clases que implementan las interfaces de repositorios, además de poder añadir funcionalidades aparte a través de métodos o funciones. Utilizan la anotación @Service.
-            
-### Motor de base de datos
-
-El motor de base de datos escogido es MySQL, dado que presenta grandes ventajas 	
-frente a otros motores disponibles actualmente.
-Adicionalmente, se usa un ORM para Java que facilita el mapeo de atributos en una base de datos relacional, de modo que agiliza la relación entre una aplicación y una base de datos, optimizando el flujo de trabajo.
-
-        ◦ Su adquisición es gratuita, lo que permite reducción de costes para el cliente.
-        ◦ Es multiplataforma para Windows, Linux y Mac, con lo cual se podrá usar en cualquiera de estos sistemas operativos.
-        ◦ Al ser un motor muy extendido entre la comunidad de desarrolladores, es sencillo encontrar ayuda.
-        ◦ La labor de mantenimiento de una base de datos MySQL es relativamente sencilla frente a sus competidores, ya que presenta menos funciones. Lejos de ser una desventaja, esto se presenta como un punto a favor, ya que supone que el mantenimiento de la aplicación lo puede llevar el propio desarrollador, sin tener que recurrir a un administrador de bases de datos.
-        ◦ Finalmente, es escalable, lo cual lo convierte en una gran ventaja si se quiere ampliar la extensión del proyecto.
+El motor de base de datos escogido es SQLite, dado que presenta grandes ventajas frente a otros motores disponibles actualmente. Adicionalmente, se usa el ORM de Django como se ha comentado anteriormente que facilita el mapeo de atributos en una base de datos relacional, de modo que agiliza la relación entre una aplicación y una base de datos, optimizando el flujo de trabajo.
+      
+      ◦ Su adquisición es gratuita, lo que permite reducción de costes para el cliente.
+      ◦ Es multiplataforma para Windows, Linux y Mac, con lo cual se podrá usar en cualquiera de estos sistemas operativos.
+      ◦ Al ser un motor muy extendido entre la comunidad de desarrolladores, es sencillo encontrar ayuda.
+      ◦ La labor de mantenimiento de una base de datos SQLite es relativamente sencilla frente a sus competidores, ya que presenta menos funciones. Lejos         de ser una desventaja, esto se presenta como un punto a favor, ya que supone que el mantenimiento de la aplicación lo puede llevar el propio             desarrollador, sin tener que recurrir a un administrador de bases de datos.
+      
+      ◦ Finalmente, es escalable, lo cual lo convierte en una gran ventaja si se quiere ampliar la extensión del proyecto.
         
  <a name="implementacion_pruebas"></a>
    ### 1.4.3 Implementación y pruebas 
    
-La plataforma cuenta con varios controladores que permiten desplegar la información almacenada en la base de datos mediante el motor de plantillas Thymeleaf. En la página principal, se muestra la lista de coches disponibles para alquilar mediante los siguientes métodos:
+La plataforma cuenta con varios métodos definidos en el archivo views.py que permiten renderizar las principales vistas de la interfaz de usuario. El siguiente método permite al usuario visualizar los principales productos a la venta:
    
-   ```
+    
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208071061-3acc257b-3da9-4a5f-ac21-651b0e6e6274.png)
    
-   @GetMapping("/")
-    public String index(Model model,@RequestParam(name = "q", required = false) String consulta) {
-        
-        List<Coche> resultado = (consulta == null) ? cocheService.findAll() : cocheService.buscador(consulta);
-        model.addAttribute("coches", resultado);
-        return "home";
-    }
+   Imagen 9.1. Representación de la interfaz principal “store” que permite visualizar los productos al posible comprador.
 
-    @GetMapping("/coche/{id}")
-    public String showDetails(@PathVariable("id") Integer id, Model model) {
-        Coche coche = cocheService.findById(id);
-        if (coche != null) {
-            model.addAttribute("coche", coche);
-            return "coche";
-        }
+Por un lado, se comienza a gestionar la inserción de registros en sus correspondientes tablas: cliente, producto_pedido y pedido. Por otro lado, si el usuario no está idenficado, se comienza la gestión del pedido mediante cookies. 
 
-        return "redirect:/";
+En este código de html, se crear un loop en los productos disponibles, en los cuales se añade funcionalidad al boton “Add to cart” mediante clases y JavaScript.
 
-    }
-    
-   ```
-El primer método recoge todos los coches disponibles mediante la clase “CocheService” que implementa a su vez la interfaz “CocheRepository”, y los muestra en la plantilla “home”, mientras que en el segundo método se muestran detalles de un coche de manera individual. 
+ ![Imagen](https://user-images.githubusercontent.com/117280411/208071484-b43ac7ea-e729-429f-81d1-9aea0a0aef3e.png)
+   
+   Imagen 9.2. Representación de la interfaz principal “store” que permite visualizar los productos al posible comprador.
+   
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208071691-55b16bf8-b992-471c-b742-79e3aca09707.png)
+   
+   Imagen 9.3. For loop que recoge los principales atributos de la clase producto.Este bucle recorre los botones previamente mencionados en la anterior      captura y los guarda en variable
+   
+     ![Imagen](https://user-images.githubusercontent.com/117280411/208071940-72562b3c-9d38-4c01-9cab-3e549fa74e19.png)
+   
+   Imagen 9.4. Esta imagen representa  la función que añade productos al carrito según el tipo de usuario(addCookieItem para usuarios no logueados y updateUserOrder  para usuarios logueados).
+   
+   Finalmente, mediante Fetch API de JavaScript, se envía la información recogida en la vista mediante un metodo post, a una vista intermedia: “update_item”.
+   
+  ![Imagen](https://user-images.githubusercontent.com/117280411/208072208-e04728a2-0777-445a-b406-a460e5a2ed1c.png)
+   
+   Imagen 9.5. Esta imagen representa la creación de una cookie que se encargará de gestionar la información de  un usuario no logueado. 
 
-Por otro lado, la implementación CRUD de la aplicación se encuentra en un controlador llamado “Agregar Controller” de la siguiente manera:
+Por otro lado, se requiere de la creación de una cookie para los usuarios que no desean registrarse en la plataforma para poder comprar.
 
-```
-@GetMapping(value = "/agregar")
-    public String agregarCoche(Model model) {
-        model.addAttribute("coche", new Coche());
-        return "coches/agregar_coche";
-    }
+    ![Imagen](https://user-images.githubusercontent.com/117280411/208072494-046c820c-7785-4cd5-b914-90c32c3b0791.png)
+   
+   Imagen 9.6. Función que añade productos al carrito a través de la cookie. 
+   
+ Con esta función podemos añadir un producto al carrito a través de la cookie creada previamente. De la misma manera, se puede eliminar productos del   carrito, hasta el punto de eliminarlos por completo del mismo
+ 
+ ![Imagen](https://user-images.githubusercontent.com/117280411/208072692-5285ddc2-cf9c-4571-8312-4e4cac7dcbf3.png)
+   
+   Imagen 9.7. Representación de la clase pedido junto con sus metodos. 
+   
+   En la clase Pedido se añaden dos métodos los cuales permiten calcular el numero total de productos pedidos que contiene un pedido, además de la cantidad total del mismo. El decorador @property, actua como un atributo mas del objeto “pedido”.
+   
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208073095-b6cc58fa-30be-4a6e-b1b3-f5ea9e914677.png)
+   
+   Imagen 9.8. Función que añade productos a la cesta de un usuario logueado. 
+   
+   En este método, se recoge la información que se guarda en archivo .json a través de Fetch API, lo cual permite modificar de manera dinámica la cantidad de productos que se encuentran en el carrito, a la vez que se guarda la información en la base de datos.
+   
+    ![Imagen](https://user-images.githubusercontent.com/117280411/208073261-b085fb00-3d16-4533-a55e-7d1b7a6e5871.png)
+   
+   Imagen 9.9. Función del archivo cart.js que permite  ejecuta la funcion submitFormData. 
+   
+   En estas lineas de JavaScript, se encuentra el codigo necesario para esconder el formulario de envío requerido si el carrito solo contiene productos digitales, además de mostrar el boton de pago si el cliente está decidido a comprar.
 
    
 
-@PostMapping(value = "/agregar")
-    public String guardarCoche(@ModelAttribute("coche") @Valid Coche coche, @RequestParam("file") MultipartFile file, BindingResult bindingResult, RedirectAttributes redirectAttrs) throws IOException {
-        if (bindingResult.hasErrors()) {
-            return "coches/agregar_coche";
-        }
-        if (cocheRepository.findFirstByMatricula(coche.getMatricula()) != null) {
-            redirectAttrs
-                    .addFlashAttribute("mensaje", "Ya existe un coche con esa matricula")
-                    .addFlashAttribute("clase", "warning");
-            return "redirect:/coches/agregar";
-        }
+    ![Imagen](https://user-images.githubusercontent.com/117280411/208073583-45702ae9-a890-43d5-b741-a63a0271609b.png)
+   
+   Imagen 9.10. Representación de la  funcion submitFormData. 
 
-        if (!file.isEmpty()) {
-            String imagen = storageService.store(file);
-            coche.setImagen(MvcUriComponentsBuilder
-                    .fromMethodName(FilesController.class, "serveFile", imagen).build().toUriString());
-        }
+Al igual que se hizo con los productos que se añadían al carrito, en esta función de JavaScript, se procesa un pedido realizado por un cliente, además de una dirección de envío si procede a través de fetch API. El resultado es la creación de un pedido asignado a una dirección de pedido que ha introducido el cliente para ser recibido.
 
-
-        cocheRepository.save(coche);
-        redirectAttrs
-                .addFlashAttribute("mensaje", "Agregado correctamente")
-                .addFlashAttribute("clase", "success");
-        return "redirect:/coches/agregar";
-    }
-```
-El primer método “agregarCoche” recoge los campos de la plantilla de thymeleaf, y los agrega a un objeto coche. Después, mediante el método “guardarCoche” se manda la información introducida por el usuario en la plantilla a la base de datos. Este método también incluye la inserción de una imagen para un nuevo registro de objeto coche. 
-
-Finalmente, el controlador “AlquilarController” incluye los métodos más complejos de la aplicación, ya que estos incluyen el registro de alquileres realizados por un cliente, y la suma de los mismos.
-
-```
-private ArrayList<CocheParaAlquilar> obtenerCarrito(HttpServletRequest request) {
-        ArrayList<CocheParaAlquilar> carrito = (ArrayList<CocheParaAlquilar>) request.getSession().getAttribute("carrito");
-        if (carrito == null) {
-            carrito = new ArrayList<>();
-        }
-        return carrito;
-    }
-
-    private void guardarCarrito(ArrayList<CocheParaAlquilar> carrito, HttpServletRequest request) {
-        request.getSession().setAttribute("carrito", carrito);
-    }
+ ![Imagen](https://user-images.githubusercontent.com/117280411/208073805-e056112c-cc48-495f-a9f6-dd18a6191c2a.png)
+   
+   Imagen 9.11. Representación de la  funcion  python processOrder. 
+   
+   La implementación de funciones relacionadas con los pedidos tramitados mediante la cookie previamente creada, nos permite aislar estos métodos para después ser importados desde views. En este caso, cookieCart muestra los productos que el usuario ha ido añadiendo al carrito.
+   
+    ![Imagen](https://user-images.githubusercontent.com/117280411/208073998-334a9df1-82a8-4057-9c36-d68eed6ac697.png)
+   
+   Imagen 9.12. Representación de la  funcion cookieCart. 
+   
+   Por otro lado, la funcion cartData permite acceder a toda la información recopilada en el metodo anterior, para después ser procesada en una última funcion que confirma el pedido realizado por un usuario sin ser logueado. 
+   
+   
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208074212-55bdab68-746d-4e4b-b0b3-ebafbc5a109b.png)
     
-```
-
-Mediante estos dos métodos, se crea un arraylist de coches que desea el usuario, que a su vez se guarda en una sesión mediante el segundo método mostrado.
-
-```
-@GetMapping(value = "/")
-    public String interfazAlquiler(Model model, HttpServletRequest request) {
-        model.addAttribute("coche", new Coche());
-        float total = 0;
-        ArrayList<CocheParaAlquilar> carrito = this.obtenerCarrito(request);
-        for (CocheParaAlquilar coche: carrito) total += coche.getTotal();
-        model.addAttribute("total", total);
-        return "alquilar/alquilar";
-    }
+   Imagen 9.13. Imagen que representa la función cartData 
+   
+   Finalmente, la función guestOrder nos permite confirmar el pedido de un usuario no logueado mediante el acceso a la información guardada en la variable “cookieData”. En esta función se guarda en base de datos a un cliente junto con su nombre e email, para poder obtener información sobre los pedidos que ha realizado en la plataforma anteriormente. Por otro lado, se asocia a este mismo cliente a un pedido, junto con los productos pertenecientes al mismo.
+   
+ ![Imagen](https://user-images.githubusercontent.com/117280411/208074379-c12eddcc-9c56-4848-9b2d-af5f45253ad7.png)
     
-```
-“interfazAlquiler” obtiene los atributos del coche y por otro lado recorre el carrito que encuentra el coche en cuestión, para después sumar el precio al total de la operación.
-
-```
-@PostMapping(value = "/agregar")
-    public String agregarAlCarrito(@ModelAttribute Coche coche, HttpServletRequest request, RedirectAttributes redirectAttrs) {
-        ArrayList<CocheParaAlquilar> carrito = this.obtenerCarrito(request);
-        Coche cocheBuscadoPorMatricula = cocheRepository.findFirstByMatricula(coche.getMatricula());
-        if (cocheBuscadoPorMatricula == null) {
-            redirectAttrs
-                    .addFlashAttribute("mensaje", "El coche con matricula " + coche.getMatricula() + " no existe")
-                    .addFlashAttribute("clase", "warning");
-            return "redirect:/alquilar/";
-        }
-        if (cocheBuscadoPorMatricula.sinExistencia()) {
-            redirectAttrs
-                    .addFlashAttribute("mensaje", "El coche no está disponible")
-                    .addFlashAttribute("clase", "warning");
-            return "redirect:/alquilar/";
-        }
-        boolean encontrado = false;
-        for (CocheParaAlquilar cocheParaAlquilar : carrito) {
-            if (cocheParaAlquilar.getMatricula().equals(cocheBuscadoPorMatricula.getMatricula())) {
-                cocheParaAlquilar.aumentarMeses();
-                encontrado = true;
-                break;
-            }
-        }
-        if (!encontrado) {
-            carrito.add(new CocheParaAlquilar(cocheBuscadoPorMatricula.getMarca(), cocheBuscadoPorMatricula.getMatricula(), cocheBuscadoPorMatricula.getPrecio(), cocheBuscadoPorMatricula.getExistencia(), cocheBuscadoPorMatricula.getId(), 1f,cocheBuscadoPorMatricula.getImagen()));
-        }
-        this.guardarCarrito(carrito, request);
-        return "redirect:/alquilar/";
-    }
-    
-```
-Este método recoge la matrícula introducida por el usuario en la interfaz, y si coincide con un registro de coches de la base de datos, lo guarda en la sesión del carrito. Si esta operación se realiza de nuevo, aumenta el número de meses totales, al igual que el precio total del alquiler.
-
-```
-@PostMapping(value = "/terminar")
-    public String firmarAlquiler(HttpServletRequest request, RedirectAttributes redirectAttrs) {
-        ArrayList<CocheParaAlquilar> carrito = this.obtenerCarrito(request);
-        if (carrito == null || carrito.size() <= 0) {
-            return "redirect:/alquilar/";
-        }
-        Alquiler alquiler = alquileresRepository.save(new Alquiler());
-        for (CocheParaAlquilar cocheParaAlquilar : carrito) {
-            Coche coche = cocheRepository.findById(cocheParaAlquilar.getId()).orElse(null);
-            if (coche == null) continue;
-            coche.restarExistencia(cocheParaAlquilar.getMeses());
-            cocheRepository.save(coche);
-            CocheAlquilado cocheAlquilado = new CocheAlquilado(cocheParaAlquilar.getMeses(), cocheParaAlquilar.getPrecio(), cocheParaAlquilar.getMarca(), cocheParaAlquilar.getMatricula(), alquiler);
-            cochesAlquiladosRepository.save(cocheAlquilado);
-        }
-        this.limpiarCarrito(request);
-        redirectAttrs
-                .addFlashAttribute("mensaje", "Alquiler realizado correctamente")
-                .addFlashAttribute("clase", "success");
-        return "redirect:/alquilar/";
-    }
-    
-```
+   Imagen 9.14. Imagen que representa la función cartData 
+   
+   
 Finalmente, “firmarAlquiler” confirma y guarda un alquiler realizado por un usuario, resta existencias a los coches disponibles, y refleja en la tabla “CocheAlquilado” los detalles del alquiler, para posteriormente poder ser mostrados al usuario a modo de confirmación.
 
 <a name="implantacion_documentacion"></a>	

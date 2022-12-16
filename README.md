@@ -285,8 +285,78 @@ Al igual que se hizo con los productos que se añadían al carrito, en esta func
     
    Imagen 9.14. Imagen que representa la función cartData 
    
+### Pruebas
    
-Finalmente, “firmarAlquiler” confirma y guarda un alquiler realizado por un usuario, resta existencias a los coches disponibles, y refleja en la tabla “CocheAlquilado” los detalles del alquiler, para posteriormente poder ser mostrados al usuario a modo de confirmación.
+Durante el desarrollo del proyecto se han llevado a cabo pruebas manuales, a medida que el proyecto precisaba de cambios o nuevas funcionalidades.
+
+![Imagen](https://user-images.githubusercontent.com/117280411/208074952-f697ccd5-e5e5-4b89-84c4-e0eafbf3fe8f.png)
+    
+   Imagen 10. Representación de la  updateUserOrder
+   
+   Mediante el uso de FetchAPI se consiguó que el usuario pudiera añadir a su carrito, productos de manera dinámica. Durante la implementación de esta función, se presentaron ciertas complicaciones como por ejemplo el apartado headers el cual requería la línea “'Content-Type':'application/json'” para envíar el id de un producto a la siguiente vista. Por otro lado, para recargar la página y añadir los productos de manera dinámica, se decidió usar la función “location.reload”. Esta función ofrece la recarga de la página cada vez que se añade un producto al carrito por parte de un usuario. En definitiva, se ha elegido esta opción sobre otras posibles opciones como por ejemplo jQuery.ajax() o el propio Django, ya que ofrece la posibilidad de enviar JSON data, lo cual se presentaba más conveniente junto con la manera de tramitar pedidos con cookies.
+   
+Por otro lado, como se ha comentado antes, la posibilidad de un usuario de comprar productos en la plataforma sin necesidad de registrarse se ha llevado a cabo mediante cookies. De la misma manera que se utiliza formato JSON para navegar por las diferentes vistas con los productos deseados, y finalmente confirmar el pedido como lo haría un usuario registrado,  se han utilizado varios métodos en el archivo views.py, así como métodos nativos de JS, que nos permiten tramitar pedidos de una forma similar a la que se haría con un usuario registrado en la plataforma. 
+   
+   
+![Imagen](https://user-images.githubusercontent.com/117280411/208075135-3a640f55-f6dc-4b47-9e05-9aeb4716400f.png)
+
+   Imagen 10.1 Representación de la  funcion getCookie. 
+   
+   Esta función crea una cookie llamada “cart”, y la convierte a JSON string para ser enviado a través de las diferentes vistas.
+   
+   ![Imagen](https://user-images.githubusercontent.com/117280411/208075438-3f3997cf-9abd-4552-9f37-598a97222e49.png)
+
+   Imagen 10.2 Representación de la  funcion addCookieItem. 
+   
+   Con esta función podemos añadir productos a “cart” para luego ser renderizados en la vista de manera que un cliente guest puede saber lo que lleva en    su cesta temporal. De nuevo, el método JS “stringify” convierte un objeto JS en un JSON string.
+   ```
+    Test:
+
+    Make order with guest user
+    Result => Cookie reloads coming back empty string and order is being placed in database
+    Make order with registered user
+    Result => Data registered in database
+    Make order with same id
+    Result => field complete not ticked as true, OrderItems contain transaction id, orders are saved with transaction id
+    Assign orders to id instead of transaction id def __str__(self): return str(self.id)
+    Result => Orders are assigned to ids and orderItems are assigned to certain order ids
+    Make order being a registered user
+    Result => Order is created with an id and products are assigned to it. Complete checkbox is checked
+```
+Sin embargo, una de las partes más interesantes de este proyecto es la idea de establecer una jerarquía de usuarios, que está proporcionada por la parte admin propia de Django. La ventaja de esto, es que una vez la plataforma creciese, se podrían crear grupos que tuvieran diferentes permisos, según el grupo al que perteneciesen. En este caso, se han establecido dos grupos: admin y customer, con la intención de que el grupo admin tenga acceso a secciones privilegiadas de la plataforma, como un historial de pedidos de la plataforma, así como información de clientes, para poder establecer una estrategia de marketing digital.
+
+ ![Imagen](https://user-images.githubusercontent.com/117280411/208075709-59dfa0f9-b34d-4b6e-80fa-cc268ca97693.png)
+
+   Imagen 10.3.Representación de la  las funciones que organizan a usuarios en grupos 
+    Con estas tres funciones podemos manejar el flujo de acceso de un usuario a la plataforma dependiendo de a qué grupos pertenezca.
+    
+    ```
+        Test:
+        Create a user through register.html
+        Result => User created successfully
+        Create a user with email
+        Result => User created successfully and email saved
+        Type a user that is not registered
+        Result => Error message in interface
+        Log in with user registered
+        Result => Name of user shows up in navbar
+```
+Process order with logged in user 
+Cookie not required for logged in user so conditional added just before cookie is created 
+
+![Imagen](https://user-images.githubusercontent.com/117280411/208076030-863f38df-9e13-47a6-8251-9b4cfdd9dcb1.png)
+
+![Imagen](https://user-images.githubusercontent.com/117280411/208076095-831f18c4-f652-42b5-a591-dd0d30880327.png)
+
+Result => Order was not being processed as part of a query error 
+Process order with non logged-in user
+Result => Success
+Conclusion: Orders were not being processed correctly with logged-in users 
+
+![Imagen](https://user-images.githubusercontent.com/117280411/208076248-9e55b192-cff2-4013-90db-7510f2c1c9a6.png)
+
+In order to know whether user orders were being completed, a few prints were added so that we could see if pedido.get_cart_total that comes from python Pedido matches that of the total that comes from JS. Only then, the order is processed properly. 
+
 
 <a name="implantacion_documentacion"></a>	
 ### 1.4.4 Implantación y documentación

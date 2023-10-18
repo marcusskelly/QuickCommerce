@@ -15,3 +15,6 @@ services:
     image: sqlite:latest
     volumes:
       - sqlite_data:/var/lib/sqlite3
+
+volumes:
+  sqlite_data:
